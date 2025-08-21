@@ -58,12 +58,20 @@ class _DashboardPageState extends State<DashboardPage> {
         SnackBar(content: Text('Fotoğraf alındı: ${photo.name}')),
       );
 
-      Navigator.push(
+      // await ile dönüş değerini yakala
+      final changed = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => CounterEntryPage(photoPath: photo.path),
         ),
       );
+
+      if (changed == true && mounted) {
+        setState(() {}); 
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Okuma eklendi.')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fotoğraf alınamadı: $e')),
@@ -97,7 +105,7 @@ class _DashboardPageState extends State<DashboardPage> {
         .collection('users')
         .doc(uid)
         .collection('readings')
-        .orderBy('created_at', descending: true); // <-- mevcut sıralama
+        .orderBy('created_at', descending: true); // mevcut sıralama
 
     if (_range != null) {
       final start = DateTime(_range!.start.year, _range!.start.month, _range!.start.day);
@@ -107,7 +115,6 @@ class _DashboardPageState extends State<DashboardPage> {
       q = q
           .where('created_at', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
           .where('created_at', isLessThan: Timestamp.fromDate(endExclusive));
-      
     }
 
     return q.snapshots();
@@ -138,6 +145,7 @@ class _DashboardPageState extends State<DashboardPage> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
+              if (!mounted) return;
               Navigator.pushReplacementNamed(context, '/login');
             },
           )
@@ -189,7 +197,6 @@ class _DashboardPageState extends State<DashboardPage> {
             // (Base64 thumbnail + Düzenle + Silme)
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                // sabit sorgu yerine filtrelenmiş stream
                 stream: _buildStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -213,7 +220,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       final sayacNo = data['sayac_no']?.toString().replaceAll('"', '') ?? 'Bilinmiyor';
                       final deger = data['deger']?.toString() ?? '-';
 
-                      // created_at'tan tarih + saat üret ----
+                      // created_at'tan tarih + saat üret
                       final tarihStrField = data['okuma_tarihi'] as String?;
                       String datePart = '-';
                       String timePart = '--:--';
@@ -224,7 +231,6 @@ class _DashboardPageState extends State<DashboardPage> {
                         datePart = DateFormat('yyyy-MM-dd').format(dt);
                         timePart = DateFormat('HH:mm').format(dt);
                       } else if (tarihStrField != null && tarihStrField.isNotEmpty) {
-                        // created_at yoksa sadece tarihi göster
                         datePart = tarihStrField;
                       }
 
@@ -244,7 +250,6 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           );
                         } catch (_) {
-                          // decode hatası olursa ikona düş
                           leadingWidget = const Icon(
                             Icons.speed_outlined,
                             size: 30,
@@ -266,10 +271,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           leading: leadingWidget,
                           title: Text("Sayaç No: $sayacNo", style: const TextStyle(fontWeight: FontWeight.w600)),
-                          // Tarih + Saat birlikte gösteriliyor 
                           subtitle: Text("Değer: $deger • $datePart $timePart"),
-
-                          // Düzenle + Sil butonları 
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -321,7 +323,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                         .collection('users')
                                         .doc(FirebaseAuth.instance.currentUser!.uid)
                                         .collection('readings')
-                                        .doc(doc.id) // <--- o satırın belge ID'si
+                                        .doc(doc.id)
                                         .delete();
 
                                     if (context.mounted) {
@@ -340,7 +342,6 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ],
                           ),
-                          
                         ),
                       );
                     },

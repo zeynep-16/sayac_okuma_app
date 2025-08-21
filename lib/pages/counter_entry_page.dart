@@ -1,14 +1,16 @@
 // lib/pages/counter_entry_page.dart
 import 'dart:io';
-import 'dart:convert'; 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// OCR servisi importu 
-import '../services/ocr_service.dart'; 
+// OCR servisi importu
+import '../services/ocr_service.dart';
+// transaction’lı ekleme için service
+import '../services/reading_service.dart';
 
-//fotoğraf yolu alarak sayaç girişi yapan sayfa
+// fotoğraf yolu alarak sayaç girişi yapan sayfa
 class CounterEntryPage extends StatefulWidget {
   final String photoPath;
   const CounterEntryPage({super.key, required this.photoPath});
@@ -18,44 +20,44 @@ class CounterEntryPage extends StatefulWidget {
 }
 
 class _CounterEntryPageState extends State<CounterEntryPage> {
-  //form doğrulama için global key
+  // form doğrulama için global key
   final _formKey = GlobalKey<FormState>();
 
-  //form alanlı controller ları
+  // form alanlı controller'ları
   final _sayacNoCtrl = TextEditingController();
   final _degerCtrl = TextEditingController();
   final _lokasyonCtrl = TextEditingController();
   final _notCtrl = TextEditingController();
 
-  //OCR servisi ve durum bayrağı 
-  final OcrService _ocr = OcrService(); 
-  bool _ocring = false;                 
+  //  OCR servisi ve durum bayrağı
+  final OcrService _ocr = OcrService();
+  bool _ocring = false;
 
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    // Ekran açılır açılmaz görüntüyü tara ve alanı doldur 
+    // Ekran açılır açılmaz görüntüyü tara ve alanı doldur
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _runOcr(); 
+      _runOcr();
     });
   }
 
   @override
   void dispose() {
-    //bellek sızıntılarını önlemek için controller ları serbest bırak
+    // bellek sızıntılarını önlemek için controller'ları serbest bırak
     _sayacNoCtrl.dispose();
     _degerCtrl.dispose();
     _lokasyonCtrl.dispose();
     _notCtrl.dispose();
 
-    // OCR'i kapat 
-    _ocr.dispose(); 
+    // OCR'i kapat
+    _ocr.dispose();
     super.dispose();
   }
 
-  // OCR çalıştır ve _degerCtrl'i otomatik doldur 
+  // OCR çalıştır ve _degerCtrl'i otomatik doldur
   Future<void> _runOcr() async {
     if (_ocring) return;
     setState(() => _ocring = true);
@@ -102,23 +104,13 @@ class _CounterEntryPageState extends State<CounterEntryPage> {
     try {
       final uid = user.uid;
 
-      // Tarih damgası (metinsel)
-      final now = DateTime.now();
-      final ymd = now.toIso8601String().split('T').first;
-
-      // 1) Firestore'da docId üret
-      final docRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('readings')
-          .doc();
-
-      // 2) Fotoğrafı Base64'e çevir 
+      // 1) Fotoğrafı Base64'e çevir
       final bytes = await File(widget.photoPath).readAsBytes();
       final photoB64 = base64Encode(bytes);
 
-      // 3) Değer mutlaka sayı olsun
-      final value = double.tryParse(_degerCtrl.text.trim());
+      // 2) Değer mutlaka sayı olsun (virgül nokta dönüşümü dahil)
+      final valueText = _degerCtrl.text.trim().replaceAll(',', '.');
+      final value = double.tryParse(valueText);
       if (value == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Okunan değer sayı olmalı')),
@@ -126,33 +118,38 @@ class _CounterEntryPageState extends State<CounterEntryPage> {
         return;
       }
 
-      // 4) Firestore’a yaz
-      final payload = {
-        'kullanici_id': uid,
-        'sayac_no': _sayacNoCtrl.text.trim(),
-        'deger': value, // daima sayı
-        'okuma_tarihi': ymd,
-        'lokasyon': _lokasyonCtrl.text.trim().isEmpty
-            ? null
-            : _lokasyonCtrl.text.trim(),
-        'not': _notCtrl.text.trim().isEmpty ? null : _notCtrl.text.trim(),
+      // 3) Transaction’lı ekleme (aynı değer engeli service + rules)
+      await ReadingService().addReading(
+        uid: uid,
+        sayacNo: _sayacNoCtrl.text.trim(),
+        deger: value,
+        extra: {
+          'kullanici_id': uid,
+          'okuma_tarihi': DateTime.now().toIso8601String().split('T').first,
+          'lokasyon': _lokasyonCtrl.text.trim().isEmpty ? null : _lokasyonCtrl.text.trim(),
+          'not': _notCtrl.text.trim().isEmpty ? null : _notCtrl.text.trim(),
 
-        // <-- Base64 alanları
-        'photo_b64': photoB64,
-        'photo_mime': 'image/jpeg',
-        'photo_size': bytes.lengthInBytes,
+          // Base64 alanları
+          'photo_b64': photoB64,
+          'photo_mime': 'image/jpeg',
+          'photo_size': bytes.lengthInBytes,
 
-        'created_at': FieldValue.serverTimestamp(),
-        'updated_at': FieldValue.serverTimestamp(),
-      };
-
-      await docRef.set(payload);
+          'created_at': Timestamp.now(),
+          'updated_at': Timestamp.now(),
+        },
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sayaç listeye eklendi.')),
       );
       Navigator.pop(context, true); // listeleri tazelemek için true döndü
+    } on StateError catch (e) {
+      // İş kuralı ihlâli: aynı değer
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Aynı değerle eklenemez.')),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,7 +201,7 @@ class _CounterEntryPageState extends State<CounterEntryPage> {
                         labelText: 'Okunan Değer',
                         prefixIcon: const Icon(Icons.speed_outlined),
                         border: const OutlineInputBorder(),
-                        // OCR durum göstergesi / tekrar tara düğmesi 
+                        //  OCR durum göstergesi / tekrar tara düğmesi
                         suffixIcon: _ocring
                             ? const Padding(
                                 padding: EdgeInsets.all(12),
