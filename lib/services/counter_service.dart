@@ -9,6 +9,7 @@ class CounterService {
   /// Firestore belgesini ve varsa Storage görselini siler.
   /// storagePath: "sayac_fotograflari/abc123.jpg" gibi bir yol tutulduğunu varsayar.
   Future<void> deleteCounter({
+    required String uid,        // kullanıcıya özel yol için gerekli
     required String docId,
     String? storagePath,
   }) async {
@@ -17,13 +18,18 @@ class CounterService {
       try {
         await _storage.ref(storagePath).delete();
       } catch (_) {
-        // Görsel yoksa ya da yetki yoksa burada uygulamayı düşürme.
-        // İstersen log basabilirsin.
+        // Görsel yoksa ya da yetki yoksa uygulamayı düşürme.
+        // Gerekirse log basabilirsin.
       }
     }
 
-    // 2) Firestore belgesini sil
-    await _db.collection('sayaclar').doc(docId).delete();
+    // 2) Firestore belgesini sil (doğru yol: users/{uid}/readings/{docId})
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('readings')
+        .doc(docId)
+        .delete();
   }
 
   /// users/{uid}/readings/{docId} yolundaki okuma kaydını günceller.
@@ -33,7 +39,7 @@ class CounterService {
     required String docId,
     required Map<String, dynamic> data,
   }) async {
-    // son düzenleme zamanını otomatik basma
+    // son düzenleme zamanını otomatik ekle
     data['updated_at'] = FieldValue.serverTimestamp();
 
     await _db

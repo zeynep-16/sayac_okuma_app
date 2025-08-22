@@ -5,8 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'counter_entry_page.dart';
 import 'counter_edit_page.dart';
-
 import 'package:intl/intl.dart'; // tarih-saat formatlama
+
+// Silme işlemi için servis
+import '../services/counter_service.dart';
 
 // Stateful yapıldı (tarih filtresi durumu için)
 class DashboardPage extends StatefulWidget {
@@ -19,6 +21,9 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   // tarih aralığı (null = filtre yok)
   DateTimeRange? _range;
+
+  // servis örneği
+  final _counterService = CounterService();
 
   Future<void> _pickImage(BuildContext context) async {
     try {
@@ -119,6 +124,55 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return q.snapshots();
   }
+
+  // Silme akışı servisi kullanıyor (uid + storagePath)
+  Future<void> _confirmAndDelete({
+    required String docId,
+    required String sayacNo,
+    String? storagePath,
+  }) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Silinsin mi?'),
+        content: Text('#$sayacNo kaydı silinecek. Emin misin?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+      await _counterService.deleteCounter(
+        uid: uid,
+        docId: docId,
+        storagePath: storagePath, // opsiyonel
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kayıt silindi.')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Silme hatası: $e')),
+        );
+      }
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -264,86 +318,74 @@ class _DashboardPageState extends State<DashboardPage> {
                         );
                       }
 
-                      return Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 2,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          leading: leadingWidget,
-                          title: Text("Sayaç No: $sayacNo", style: const TextStyle(fontWeight: FontWeight.w600)),
-                          subtitle: Text("Değer: $deger • $datePart $timePart"),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blueGrey),
-                                tooltip: 'Düzenle',
-                                onPressed: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => CounterEditPage(
-                                        docId: doc.id,
-                                        initialData: data,
+                      // Storage path (varsa)
+                      final String? storagePath = data['storage_path'] as String?;
+
+                      // Card bloğu Dismissible ile sarıldı ---
+                      return Dismissible(
+                        key: Key(doc.id),
+                        direction: DismissDirection.endToStart, // sağdan sola kaydır
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          color: Colors.red,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        confirmDismiss: (direction) async {
+                          // Kaydırınca da aynı onay/silme akışı
+                          await _confirmAndDelete(
+                            docId: doc.id,
+                            sayacNo: sayacNo,
+                            storagePath: storagePath,
+                          );
+                          // Görsel kaldırmayı stream'e bırakıyoruz
+                          return false;
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            leading: leadingWidget,
+                            title: Text("Sayaç No: $sayacNo", style: const TextStyle(fontWeight: FontWeight.w600)),
+                            subtitle: Text("Değer: $deger • $datePart $timePart"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                                  tooltip: 'Düzenle',
+                                  onPressed: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => CounterEditPage(
+                                          docId: doc.id,
+                                          initialData: data,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                  if (result == true && context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Kayıt güncellendi.')),
                                     );
-                                  }
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                      title: const Text('Silinsin mi?'),
-                                      content: Text('#$sayacNo kaydı silinecek. Emin misin?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: const Text('Vazgeç'),
-                                        ),
-                                        FilledButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: const Text('Sil'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-
-                                  if (confirm != true) return;
-
-                                  try {
-                                    await FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                                        .collection('readings')
-                                        .doc(doc.id)
-                                        .delete();
-
-                                    if (context.mounted) {
+                                    if (result == true && context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Kayıt silindi.')),
+                                        const SnackBar(content: Text('Kayıt güncellendi.')),
                                       );
                                     }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Silme hatası: $e')),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _confirmAndDelete(
+                                    docId: doc.id,
+                                    sayacNo: sayacNo,
+                                    storagePath: storagePath,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
+                      
                     },
                   );
                 },
