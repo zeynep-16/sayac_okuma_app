@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               );
 
-              // KÜÇÜK EK: context guard (uyarıyı önler)
+              // context guard (uyarıyı önler)
               if (!mounted) return;
 
               if (changed == true) {

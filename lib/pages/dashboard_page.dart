@@ -10,7 +10,7 @@ import 'package:intl/intl.dart'; // tarih-saat formatlama
 // Silme işlemi için servis
 import '../services/counter_service.dart';
 
-// EKLENDİ: Profil sayfası
+// Profil sayfası
 import 'profile_page.dart';
 
 // Stateful yapıldı (tarih filtresi durumu için)
@@ -186,7 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(
         title: const Text("Dashboard"),
         actions: [
-          // EKLENDİ: Profil kısayolu
+          // Profil kısayolu
           IconButton(
             tooltip: 'Profilim',
             icon: const Icon(Icons.person),
