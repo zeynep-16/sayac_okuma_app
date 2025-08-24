@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // <-- eklendi (Base64 decode için)
+import 'dart:convert'; // (Base64 decode için)
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +9,9 @@ import 'package:intl/intl.dart'; // tarih-saat formatlama
 
 // Silme işlemi için servis
 import '../services/counter_service.dart';
+
+// EKLENDİ: Profil sayfası
+import 'profile_page.dart';
 
 // Stateful yapıldı (tarih filtresi durumu için)
 class DashboardPage extends StatefulWidget {
@@ -183,6 +186,18 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(
         title: const Text("Dashboard"),
         actions: [
+          // EKLENDİ: Profil kısayolu
+          IconButton(
+            tooltip: 'Profilim',
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            },
+          ),
+
           // filtre ve temizle
           IconButton(
             tooltip: 'Tarih Aralığı Seç',
