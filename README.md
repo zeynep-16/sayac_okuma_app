@@ -30,3 +30,6 @@ This application is suitable for:
 - Smart meter systems
 - Automated billing workflows
 - Reducing manual meter reading errors and labor costs
+<img width="709" height="318" alt="Ekran Resmi 2026-02-07 22 43 39" src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" />
+
+
