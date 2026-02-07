@@ -32,19 +32,17 @@ This application is suitable for:
 - Reducing manual meter reading errors and labor costs
 
 
-## Images of the application interface
+## 📸 Application Interface
 
 <p align="center">
-<img width="709" height="318" alt="Ekran Resmi 2026-02-07 22 43 39" src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" />
-
-<img width="833" height="311" alt="Ekran Resmi 2026-02-07 22 47 23" src="https://github.com/user-attachments/assets/c25df337-4537-439b-922b-e34586eb139d" />
-
-<img width="781" height="228" alt="Ekran Resmi 2026-02-07 22 47 03" src="https://github.com/user-attachments/assets/bb3d4bb0-7d06-442d-b7b6-870206b7f6d2" />
-
-<img width="699" height="234" alt="Ekran Resmi 2026-02-07 22 46 56" src="https://github.com/user-attachments/assets/4c3752ee-7512-4b3d-8d6f-3e87fc30584a" />
-
-<img width="593" height="333" alt="Ekran Resmi 2026-02-07 22 46 41" src="https://github.com/user-attachments/assets/8b166276-7dca-4666-90c3-5b4d2de60927" />
-
-<img width="689" height="266" alt="Ekran Resmi 2026-02-07 22 46 18" src="https://github.com/user-attachments/assets/884cc8a7-3d05-4365-87bc-351c63dbb179" />
-
+  <img src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" width="280"/>
+  <img src="https://github.com/user-attachments/assets/c25df337-4537-439b-922b-e34586eb139d" width="280"/>
+  <img src="https://github.com/user-attachments/assets/bb3d4bb0-7d06-442d-b7b6-870206b7f6d2" width="280"/>
 </p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4c3752ee-7512-4b3d-8d6f-3e87fc30584a" width="280"/>
+  <img src="https://github.com/user-attachments/assets/8b166276-7dca-4666-90c3-5b4d2de60927" width="280"/>
+  <img src="https://github.com/user-attachments/assets/884cc8a7-3d05-4365-87bc-351c63dbb179" width="280"/>
+</p>
+
