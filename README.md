@@ -32,7 +32,7 @@ This application is suitable for:
 - Reducing manual meter reading errors and labor costs
 
 
-## 📸 Application Interface
+## Application Interface
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" width="280"/>
