@@ -31,23 +31,10 @@ This application is suitable for:
 - Automated billing workflows
 - Reducing manual meter reading errors and labor costs
 
-## 📸 Application Screenshots
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" width="280" />
-  <img src="https://github.com/user-attachments/assets/c25df337-4537-439b-922b-e34586eb139d" width="280" />
-  <img src="https://github.com/user-attachments/assets/bb3d4bb0-7d06-442d-b7b6-87020b6f76d2" width="280" />
-</p>
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/4c3752ee-7512-4b3d-8d6f-3e87fc30584a" width="280" />
-  <img src="https://github.com/user-attachments/assets/8b166276-7dca-4666-90c3-5b4d2de60927" width="280" />
-  <img src="https://github.com/user-attachments/assets/884cc8a7-3d05-4365-87bc-351c63dbb179" width="280" />
-</p>
-
 
 ## Images of the application interface
 
+<p align="center">
 <img width="709" height="318" alt="Ekran Resmi 2026-02-07 22 43 39" src="https://github.com/user-attachments/assets/05b731b9-c149-4813-859a-0695ad32ed28" />
 
 <img width="833" height="311" alt="Ekran Resmi 2026-02-07 22 47 23" src="https://github.com/user-attachments/assets/c25df337-4537-439b-922b-e34586eb139d" />
@@ -60,4 +47,4 @@ This application is suitable for:
 
 <img width="689" height="266" alt="Ekran Resmi 2026-02-07 22 46 18" src="https://github.com/user-attachments/assets/884cc8a7-3d05-4365-87bc-351c63dbb179" />
 
-
+</p>
