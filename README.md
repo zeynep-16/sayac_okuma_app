@@ -1,16 +1,32 @@
-# sayac_okuma_app
+# 📱 Automatic Meter Reading Mobile Application
 
-A new Flutter project.
+This project presents a **Flutter-based mobile application** for **automatic meter reading** using computer vision and deep learning techniques. The system captures meter images, detects the relevant region (ROI), and recognizes meter values with high accuracy.
 
-## Getting Started
+## 🚀 Features
+- Automatic meter reading from images
+- ROI-based image preprocessing
+- OCR-based digit recognition
+- Deep learning–based accuracy improvement
+- Cloud integration for data storage and management
 
-This project is a starting point for a Flutter application.
+## 🧠 Methodology
+- **ROI-based image processing** is applied to isolate the meter region.
+- Initial text recognition is performed using **OCR (Google ML Kit)**.
+- A **CRNN (Convolutional Recurrent Neural Network)** model is trained to improve recognition accuracy on challenging images.
+- Image preprocessing and model training are carried out using **OpenCV** and **Python**.
+- **Firebase** is used for authentication, data storage, and real-time database services.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Technologies Used
+- **Mobile Development:** Flutter (Dart)
+- **Backend / Cloud:** Firebase
+- **OCR:** Google ML Kit
+- **Deep Learning:** CRNN
+- **Image Processing:** OpenCV
+- **Model Training & Processing:** Python
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📌 Use Cases
+This application is suitable for:
+- Electricity, water, and natural gas distribution companies
+- Smart meter systems
+- Automated billing workflows
+- Reducing manual meter reading errors and labor costs
